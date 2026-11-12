@@ -1,0 +1,13 @@
+group,algorithm,metric,bytes,fits_one_ble_packet
+hashing,SHA-256,digest,32,True
+hashing,SHA3-256,digest,32,True
+hashing,BLAKE2s,digest,32,True
+symmetric,AES-128-GCM,overhead_per_1KB_frame,28,True
+symmetric,ChaCha20-Poly1305,overhead_per_1KB_frame,28,True
+symmetric,3DES-CBC,overhead_per_1KB_frame,16,True
+asymmetric,RSA-2048,signature,256,False
+asymmetric,ECDSA-P256,signature,72,True
+asymmetric,Ed25519,signature,64,True
+asymmetric,RSA-2048,public_key_der,294,False
+asymmetric,ECDSA-P256,public_key_der,91,True
+asymmetric,Ed25519,public_key_der,44,True
