@@ -18,8 +18,8 @@ Code and data for COSC2539 Assessment 1 (RMIT University Vietnam). The benchmark
 
 ## Run it
 
+```bash
 pip install cryptography pandas scipy matplotlib
-pip install cryptography pandas scipy statsmodels matplotlib
 python3 bench.py my-machine 30
 python3 sizes.py
 python3 analyze.py
