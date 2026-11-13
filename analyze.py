@@ -2,11 +2,11 @@
 
 Reads every data/time_*.csv, and per machine and group runs:
   - descriptive stats (mean, SD, median)
-  - Shapiro-Wilk per algorithm (normality) and Levene (equal variance)
+  - Shapiro-Wilk per algorithm (normality) and Levene, median-centred (equal variance)
   - one-way ANOVA (the method the course asks for)
   - Alexander-Govern test (robust to unequal variance) and Kruskal-Wallis (no normality)
   - eta squared (effect size: share of time variation explained by the algorithm)
-  - Tukey HSD pairwise
+  - Tukey HSD and Games-Howell pairwise
 Writes results/stats.md and results/*.png.
 
 Usage: python3 analyze.py
@@ -29,7 +29,12 @@ ALPHA = 0.05
 GROUP_TITLES = {
     "hashing": "Hashing: 512 KB firmware image",
     "symmetric": "Symmetric: 1000 x 1 KB audio frames",
-    "asymmetric": "Asymmetric: sign + verify one firmware digest",
+    "asymmetric": "Asymmetric: verify the vendor signature on one firmware digest",
+}
+ALGOS = {
+    "hashing": ["SHA-256", "SHA3-256", "BLAKE2s"],
+    "symmetric": ["AES-128-GCM", "ChaCha20-Poly1305", "3DES-CBC"],
+    "asymmetric": ["RSA-2048", "ECDSA-P256", "Ed25519"],
 }
 
 
@@ -56,7 +61,7 @@ def analyse(df):
         lines += [f"## Machine: {machine}", ""]
         for group in GROUP_TITLES:
             gdf = mdf[mdf.group == group]
-            algos = list(dict.fromkeys(gdf.algorithm))
+            algos = ALGOS[group]
             samples = [gdf[gdf.algorithm == a].ms.tolist() for a in algos]
             lines += [f"### {GROUP_TITLES[group]}", "", "| Algorithm | n | Mean ms | SD | Median ms | Shapiro p |", "|---|---|---|---|---|---|"]
             for a, s in zip(algos, samples):
@@ -71,7 +76,7 @@ def analyse(df):
             lines += [
                 "",
                 f"- One-way ANOVA: F = {f_stat:.2f}, p = {p_anova:.3g} -> **{verdict}**",
-                f"- Levene (equal variance): p = {lev.pvalue:.3g} -> {'variances differ' if lev.pvalue < ALPHA else 'variances similar'}",
+                f"- Levene, median-centred (equal variance): p = {lev.pvalue:.3g} -> {'variances differ' if lev.pvalue < ALPHA else 'variances similar'}",
                 f"- Alexander-Govern (unequal-variance robust): p = {ag.pvalue:.3g}",
                 f"- Kruskal-Wallis (no normality assumed): H = {kw.statistic:.2f}, p = {kw.pvalue:.3g}",
                 f"- Effect size eta^2 = {eta:.3f} ({'large' if eta >= 0.14 else 'medium' if eta >= 0.06 else 'small'})",
@@ -104,7 +109,7 @@ def charts(df):
     machines = list(dict.fromkeys(df.machine))
     for group in GROUP_TITLES:
         gdf = df[df.group == group]
-        algos = list(dict.fromkeys(gdf.algorithm))
+        algos = ALGOS[group]
         fig, axes = plt.subplots(1, len(machines), figsize=(7.4, 2.5), squeeze=False)
         for ax, machine in zip(axes[0], machines):
             data = [gdf[(gdf.machine == machine) & (gdf.algorithm == a)].ms for a in algos]
@@ -123,6 +128,8 @@ def charts(df):
                 ax.yaxis.set_major_locator(LogLocator(subs=(1, 2, 5)))
                 ax.yaxis.set_minor_formatter(NullFormatter())
                 ax.set_ylim(top=max(s.max() for s in data) * 1.4)
+            else:
+                ax.set_ylim(bottom=0)  # linear axes start at zero so gaps are not exaggerated
             ax.yaxis.set_major_formatter(FuncFormatter(plain_number))
         axes[0][0].set_ylabel("time (ms)")
         fig.tight_layout(w_pad=1.2)

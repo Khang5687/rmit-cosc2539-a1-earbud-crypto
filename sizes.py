@@ -7,7 +7,7 @@ For each algorithm, measures what it adds to a Bluetooth LE message:
 and checks the result against one BLE packet's usable payload.
 
 BLE_PAYLOAD = 244 bytes: max ATT payload with LE Data Length Extension
-(251-byte link-layer PDU, MTU 247, minus 3-byte ATT header).
+(251-byte link-layer payload, minus 4-byte L2CAP header and 3-byte ATT header; needs ATT_MTU >= 247).
 
 Usage: python3 sizes.py   -> data/sizes.csv
 """
@@ -59,7 +59,7 @@ def main():
     rsa_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
     ec_key = ec.generate_private_key(ec.SECP256R1())
     ed_key = ed25519.Ed25519PrivateKey.generate()
-    pss = rsa_padding.PSS(mgf=rsa_padding.MGF1(hashes.SHA256()), salt_length=rsa_padding.PSS.MAX_LENGTH)
+    pss = rsa_padding.PSS(mgf=rsa_padding.MGF1(hashes.SHA256()), salt_length=rsa_padding.PSS.DIGEST_LENGTH)
 
     # ECDSA DER signatures vary by a few bytes, so report the largest of SAMPLES
     add("asymmetric", "RSA-2048", "signature", len(rsa_key.sign(DIGEST, pss, hashes.SHA256())))

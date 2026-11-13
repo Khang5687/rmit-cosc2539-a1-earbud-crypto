@@ -1,0 +1,24 @@
+{
+  "label": "mac-m-series",
+  "python": "3.12.10 (v3.12.10:0cc81280367, Apr  8 2025, 08:46:59) [Clang 13.0.0 (clang-1300.0.29.30)]",
+  "platform": "macOS-27.2-arm64-arm-64bit",
+  "machine": "arm64",
+  "cpu_count": 10,
+  "cryptography": "46.0.5",
+  "cryptography_openssl": "OpenSSL 3.5.5 27 Jan 2026",
+  "hashlib_openssl": "OpenSSL 3.0.16 11 Feb 2025",
+  "blake2s_impl": "_blake2.blake2s",
+  "OPENSSL_ia32cap": null,
+  "load_avg_start": [
+    28.8837890625,
+    37.46630859375,
+    33.45947265625
+  ],
+  "runs": 30,
+  "seed": 2539,
+  "load_avg_end": [
+    27.93212890625,
+    37.12646484375,
+    33.36279296875
+  ]
+}
