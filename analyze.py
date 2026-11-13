@@ -94,7 +94,7 @@ def analyse(df):
     return "\n".join(lines)
 
 
-SETUP_NAMES = {"mac-m-series": "Mac", "omen-ryzen": "Ryzen", "omen-no-crypto-hw": "Ryzen, no crypto hardware"}
+SETUP_NAMES = {"mac-m-series": "Mac", "omen-ryzen": "Ryzen", "omen-no-crypto-hw": "Ryzen, no crypto HW"}
 SHORT = {"AES-128-GCM": "AES-GCM", "ChaCha20-Poly1305": "ChaCha20", "3DES-CBC": "3DES",
          "RSA-2048": "RSA", "ECDSA-P256": "ECDSA"}
 ACCENT, GREY = "#1F2A7A", "#9EA1AA"
