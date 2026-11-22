@@ -1,6 +1,6 @@
 """A1 live demo: the three crypto families stopping the earbud attacks.
 
-Scene 1 (hashing)    - Airoha worm rewrites firmware -> hash check catches it
+Scene 1 (hashing)    - attacker rewrites firmware (Airoha flash write) -> hash check catches it
 Scene 2 (symmetric)  - attacker sniffs / edits an audio frame -> unreadable, edit rejected
 Scene 3 (asymmetric) - vendor-signed firmware installs, attacker-signed firmware refused
 
@@ -45,7 +45,7 @@ def scene_hash():
     pause("Scene 1 - Hashing: did anyone change the firmware?")
     trusted = hashlib.sha256(firmware).hexdigest()
     print(f"  Vendor publishes SHA-256: {trusted[:32]}...")
-    for label, image in [("original firmware", firmware), ("worm-modified firmware (1 byte flipped)", tampered)]:
+    for label, image in [("original firmware", firmware), ("tampered firmware (1 byte flipped)", tampered)]:
         h = hashlib.sha256(image).hexdigest()
         print(f"  {label:<42} -> {h[:32]}...")
         (ok if h == trusted else bad)(label)
@@ -79,19 +79,19 @@ def scene_asymmetric():
     vendor = ed25519.Ed25519PrivateKey.generate()
     attacker = ed25519.Ed25519PrivateKey.generate()
     burned_in_key = vendor.public_key()  # stored in the earbud at the factory
-    digest = hashlib.sha256(firmware).digest()
-    for label, image, signer in [
-        ("vendor update, vendor signature", firmware, vendor),
-        ("worm firmware, original vendor signature", tampered, vendor),
-        ("worm firmware, attacker's own signature", tampered, attacker),
+    for label, image, signed, signer in [
+        ("vendor update, vendor signature", firmware, firmware, vendor),
+        ("fake firmware, original vendor signature", tampered, firmware, vendor),
+        ("fake firmware, attacker's own signature", tampered, tampered, attacker),
     ]:
-        signature = signer.sign(digest)  # signer signs the genuine digest
+        # case 2 changes only the data, case 3 only the key: each reject has one cause
+        signature = signer.sign(hashlib.sha256(signed).digest())
         try:
             burned_in_key.verify(signature, hashlib.sha256(image).digest())
             ok(label)
         except InvalidSignature:
             bad(label)
-    print(f"  Ed25519 signature = {len(vendor.sign(digest))} bytes: fits in one BLE packet (244 B). RSA-2048 = 256 bytes does not.")
+    print(f"  Ed25519 signature = {len(signature)} bytes: fits in one BLE packet (244 B). RSA-2048 = 256 bytes does not.")
 
 
 if __name__ == "__main__":
